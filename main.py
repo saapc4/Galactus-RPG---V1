@@ -2,27 +2,27 @@ import random
 from time import sleep
 import os
 margem_mult_dano = [0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3]
-def recuperar(aiai):
-    aiai["Vida"] = aiai["Vida_maxima"]
-    aiai["Mana"] = aiai["Mana_maxima"]
-def uparlevel(cara):
-    cara["Dano"] *= 1.1
-    cara["Vida_maxima"] *= 1.1
-    cara["Vida"] = cara["Vida_maxima"]
-    cara["Mana_maxima"] *= 1.1
-    cara["Mana"] = cara["Mana_maxima"] 
-    cara["Level"] += 1
-    cara["Xp"] -= cara["Xp_maximo"]
-    cara["Xp_maximo"] += 50
+def recuperar(heroi):
+    heroi["Vida"] = heroi["Vida_maxima"]
+    heroi["Mana"] = heroi["Mana_maxima"]
+def uparlevel(pessoa):
+    pessoa["Dano"] *= 1.1
+    pessoa["Vida_maxima"] *= 1.1
+    pessoa["Vida"] = pessoa["Vida_maxima"]
+    pessoa["Mana_maxima"] *= 1.1
+    pessoa["Mana"] = pessoa["Mana_maxima"] 
+    pessoa["Level"] += 1
+    pessoa["Xp"] -= pessoa["Xp_maximo"]
+    pessoa["Xp_maximo"] += 50
 def escolher(opcoes, mensagem):
     while True:
         escolha = input(mensagem).capitalize()
         if escolha in opcoes:
             return escolha
         print('ESCOLHA UMA OPÇÃO VÁLIDA!')
-morreu = []
+luta = []
 def batalha(monstro_batalha):
-    morreu.clear()
+    luta.clear()
     turno = 1
     vida_monstro = monstro_batalha["vida"]
     vida_personagem = personagem["Vida"]
@@ -42,11 +42,12 @@ def batalha(monstro_batalha):
                 print(f'Ataques disponíveis: ')
                 for i in ataques.keys():
                     print(f'{i}')
-                atk = str(input('Ataque escolhido: '))
+                atk = str(input('Ataque escolhido: ')).capitalize()
                 if atk in ataques.keys():
                     ataque = ataques[atk].copy()
                     if ataque["mana"] > mana_personagem:
                         print(f'Mana insuficiente para usar este ataque!')
+                    else:
                         break
             vida_monstro -= ((ataque["dano"] * personagem["Dano"]) * mult_dano_jogador)
             print(f'Causou {((ataque["dano"] * personagem["Dano"]) * mult_dano_jogador):.2f} de dano!')
@@ -56,8 +57,9 @@ def batalha(monstro_batalha):
             print(f'Tentando fugir...')
             fugiu = random.randint(0, 100) 
             print(fugiu)
-            if fugiu > 60:
-                print(f'FUGIU!')
+            if fugiu <= 60:
+                luta.append('Fugiu')
+                sleep(2)
                 break
             print('FALHOU!')
             sleep(0.2)
@@ -66,6 +68,8 @@ def batalha(monstro_batalha):
             mana_personagem = min(mana_personagem + 20, personagem["Mana_maxima"])
         if vida_monstro <= 0:
             print(f'Você matou {monstro_batalha["nome"]}')
+            luta.append('Venceu')
+            sleep(3)
             break
         print(f'{monstro_batalha["nome"]} vai te atacar!')
         sleep(0.1)
@@ -74,7 +78,7 @@ def batalha(monstro_batalha):
         sleep(0.3)
         if vida_personagem <= 0:
             print('Você morreu!')
-            morreu.append('Morreu')
+            luta.append('Morreu')
             sleep(3)
             break
         turno += 1
@@ -164,24 +168,28 @@ while True:
                 personagem["Vida"] += (personagem["Vida"] * -1) + 10
                 sleep(1.3)
                 break
-            
-            print(f'Você ganhou {monstros[monstro_sorteado]["xp"]} de xp!')
-            personagem["Xp"] += monstros[monstro_sorteado]["xp"]
-            if personagem["Xp"] >= personagem["Xp_maximo"]:
-                while personagem["Xp"] >= personagem["Xp_maximo"]:
-                    uparlevel(personagem)
-                print(f'Você upou para o level {personagem["Level"]}!')
-                print('Sua vida e mana foram restauradas!')
-                if personagem["Level"] == 5:
-                    print('Você upou para o level 5!!! Ataques desbloquados: Investida, Tornado')
-                    ataques["Investida"] = {"dano": 50,"mana": 10}
-                    ataques["Tornado"] = {"dano": 60,"mana": 40}
+            if luta[0] == 'Fugiu':
+                print('Você foge para sua casa...')
+                sleep(2)
+                break
+            if luta[0] == 'Venceu':
+                print(f'Você ganhou {monstros[monstro_sorteado]["xp"]} de xp!')
+                personagem["Xp"] += monstros[monstro_sorteado]["xp"]
+                if personagem["Xp"] >= personagem["Xp_maximo"]:
+                    while personagem["Xp"] >= personagem["Xp_maximo"]:
+                        uparlevel(personagem)
+                    print(f'Você upou para o level {personagem["Level"]}!')
+                    print('Sua vida e mana foram restauradas!')
+                    if personagem["Level"] >= 5 and "Investida" not in ataques:
+                        print('Você upou para o level 5!!! Ataques desbloquados: Investida, Tornado')
+                        ataques["Investida"] = {"dano": 50,"mana": 10}
+                        ataques["Tornado"] = {"dano": 60,"mana": 40}
             if batalhas == 3:
                 print('Você se sente cansado e decide ir embora...')
                 sleep(2)
                 break        
             cont = str(input('Quer continuar caçando?'))
-            if cont in 'Nn':
+            if cont in ('N', 'n'):
                 break
             batalhas += 1
     elif evento == '2':
@@ -198,7 +206,7 @@ while True:
         while True:
             recuperar(personagem)
             batalha(monstros["Dragão Sábio"])
-            if len(morreu) == 0:
+            if luta[0] == 'Venceu':
                 os.system("clear")
                 print('Parabéns!!! Você zerou o Galactus RPG!')
                 sleep(5)
