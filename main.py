@@ -1,5 +1,4 @@
 import random
-from random import randint
 from time import sleep
 import os
 margem_mult_dano = [0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3]
@@ -35,6 +34,8 @@ def batalha(monstro_batalha):
         print(f'Sua vida: {vida_personagem:.2f}')
         print(f'Sua mana: {mana_personagem:.2f}')
         acao = escolher(("1", "2", "3"), ("1- Atacar\n2- Fugir(60% de sucesso)\n3- Curar 20% da vida e 20 de mana\n"))
+        mult_dano_jogador = random.choice(margem_mult_dano)
+        mult_dano_monstro = random.choice(margem_mult_dano)
 
         if acao == "1":
             while True:
@@ -46,9 +47,7 @@ def batalha(monstro_batalha):
                     ataque = ataques[atk].copy()
                     if ataque["mana"] > mana_personagem:
                         print(f'Mana insuficiente para usar este ataque!')
-                    break
-            mult_dano_jogador = random.choice(margem_mult_dano)
-            mult_dano_monstro = random.choice(margem_mult_dano)
+                        break
             vida_monstro -= ((ataque["dano"] * personagem["Dano"]) * mult_dano_jogador)
             print(f'Causou {((ataque["dano"] * personagem["Dano"]) * mult_dano_jogador):.2f} de dano!')
             mana_personagem -= ataque["mana"]
@@ -63,8 +62,8 @@ def batalha(monstro_batalha):
             print('FALHOU!')
             sleep(0.2)
         elif acao == "3":
-            vida_personagem *= 1.2
-            mana_personagem += 20
+            vida_personagem = min(vida_personagem + personagem["Vida_maxima"] * 0.2, personagem["Vida_maxima"])
+            mana_personagem = min(mana_personagem + 20, personagem["Mana_maxima"])
         if vida_monstro <= 0:
             print(f'Você matou {monstro_batalha["nome"]}')
             break
@@ -97,10 +96,10 @@ ataques = {
     "Raio":{"dano": 40, "mana":30}
 }
 monstros = {
-    'Slime':{"nome": 'Slime', "vida":randint(25, 40), "dano":randint(8, 20), "xp":randint(30, 60)},
-    'Lobo':{"nome": 'Lobo', "vida":randint(50, 70), "dano":randint(18, 30), "xp":randint(80, 110)},
-    'Traunt':{"nome": 'Traunt', "vida":randint(80, 100), "dano":randint(35, 60), "xp":randint(130, 170)},
-    "Dragão Sábio": {"nome": "O Grande Dragão Sábio", "vida": randint(450, 550),"dano": randint(50, 70),"xp":randint(450, 550)}
+    'Slime':{"nome": 'Slime', "vida":random.randint(25, 40), "dano":random.randint(8, 20), "xp":random.randint(30, 60)},
+    'Lobo':{"nome": 'Lobo', "vida":random.randint(50, 70), "dano":random.randint(18, 30), "xp":random.randint(80, 110)},
+    'Traunt':{"nome": 'Traunt', "vida":random.randint(80, 100), "dano":random.randint(35, 60), "xp":random.randint(130, 170)},
+    "Dragão Sábio": {"nome": "O Grande Dragão Sábio", "vida":random.randint(450, 550),"dano": random.randint(50, 70),"xp":random.randint(450, 550)}
 }
 
 print('Bem vindo ao Galactus RPG')
@@ -147,7 +146,7 @@ while True:
     
     while True:
         evento = input('O que deseja fazer? ')
-        if evento in '123':
+        if evento in ('1', '2', '3'):
             break
         print(f'Escolha uma opção!')
 
