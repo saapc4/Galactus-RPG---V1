@@ -2,6 +2,10 @@ import random
 from time import sleep
 import os
 margem_mult_dano = [0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3]
+def multiplicador(demonio):
+    demonio["vida_multiplicada"] = random.randint(* demonio["vida"])
+    demonio["dano_multiplicado"] = random.randint(* demonio["dano"])
+    demonio["xp_multiplicado"] = random.randint(* demonio["xp"])
 def recuperar(heroi):
     heroi["Vida"] = heroi["Vida_maxima"]
     heroi["Mana"] = heroi["Mana_maxima"]
@@ -24,13 +28,15 @@ luta = []
 def batalha(monstro_batalha):
     luta.clear()
     turno = 1
-    vida_monstro = monstro_batalha["vida"]
+    multiplicador(monstro_batalha)
+    vida_monstro = monstro_batalha["vida_multiplicada"]
+    vida_maxima_monstro = vida_monstro
     vida_personagem = personagem["Vida"]
     mana_personagem = personagem["Mana"]
     while True:
         print(f'{personagem["Nome"]} vs {monstro_batalha["nome"]}')
         print(f'Turno: {turno}')
-        print(f'Vida de {monstro_batalha["nome"]}: {vida_monstro:.2f}')
+        print(f'Vida de {monstro_batalha["nome"]}: {vida_monstro:.2f}/{vida_maxima_monstro:.2f}')
         print(f'Sua vida: {vida_personagem:.2f}')
         print(f'Sua mana: {mana_personagem:.2f}')
         acao = escolher(("1", "2", "3"), ("1- Atacar\n2- Fugir(60% de sucesso)\n3- Curar 20% da vida e 20 de mana\n"))
@@ -66,6 +72,8 @@ def batalha(monstro_batalha):
         elif acao == "3":
             vida_personagem = min(vida_personagem + personagem["Vida_maxima"] * 0.2, personagem["Vida_maxima"])
             mana_personagem = min(mana_personagem + 20, personagem["Mana_maxima"])
+            print(f'Curando a vida e restaurando mana...')
+            sleep(2)
         if vida_monstro <= 0:
             print(f'Você matou {monstro_batalha["nome"]}')
             luta.append('Venceu')
@@ -73,8 +81,8 @@ def batalha(monstro_batalha):
             break
         print(f'{monstro_batalha["nome"]} vai te atacar!')
         sleep(0.1)
-        vida_personagem -= (monstro_batalha["dano"] * mult_dano_monstro)
-        print(f'Causou {(monstro_batalha["dano"] * mult_dano_monstro):.2f} de dano!')
+        vida_personagem -= (monstro_batalha["dano_multiplicado"] * mult_dano_monstro)
+        print(f'Causou {(monstro_batalha["dano_multiplicado"] * mult_dano_monstro):.2f} de dano!')
         sleep(0.3)
         if vida_personagem <= 0:
             print('Você morreu!')
@@ -100,10 +108,10 @@ ataques = {
     "Raio":{"dano": 40, "mana":30}
 }
 monstros = {
-    'Slime':{"nome": 'Slime', "vida":random.randint(25, 40), "dano":random.randint(8, 20), "xp":random.randint(30, 60)},
-    'Lobo':{"nome": 'Lobo', "vida":random.randint(50, 70), "dano":random.randint(18, 30), "xp":random.randint(80, 110)},
-    'Traunt':{"nome": 'Traunt', "vida":random.randint(80, 100), "dano":random.randint(35, 60), "xp":random.randint(130, 170)},
-    "Dragão Sábio": {"nome": "O Grande Dragão Sábio", "vida":random.randint(450, 550),"dano": random.randint(50, 70),"xp":random.randint(450, 550)}
+    'Slime':{"nome": 'Slime', "vida":(25, 40), "dano":(8, 20), "xp":(30, 60)},
+    'Lobo':{"nome": 'Lobo', "vida":(50, 70), "dano":(18, 30), "xp":(80, 110)},
+    'Traunt':{"nome": 'Traunt', "vida":(80, 100), "dano":(35, 60), "xp":(130, 170)},
+    "Dragão Sábio": {"nome": "O Grande Dragão Sábio", "vida":(450, 550),"dano":(50, 70),"xp":(450, 550)}
 }
 
 print('Bem vindo ao Galactus RPG')
@@ -173,8 +181,8 @@ while True:
                 sleep(2)
                 break
             if luta[0] == 'Venceu':
-                print(f'Você ganhou {monstros[monstro_sorteado]["xp"]} de xp!')
-                personagem["Xp"] += monstros[monstro_sorteado]["xp"]
+                print(f'Você ganhou {monstros[monstro_sorteado]["xp_multiplicado"]} de xp!')
+                personagem["Xp"] += monstros[monstro_sorteado]["xp_multiplicado"]
                 if personagem["Xp"] >= personagem["Xp_maximo"]:
                     while personagem["Xp"] >= personagem["Xp_maximo"]:
                         uparlevel(personagem)
