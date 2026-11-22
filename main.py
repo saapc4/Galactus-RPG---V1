@@ -11,6 +11,7 @@ def recuperar(heroi):
     heroi["Mana"] = heroi["Mana_maxima"]
 def uparlevel(pessoa):
     pessoa["Dano"] *= 1.1
+    pessoa["Dano_magico"] *= 1.1
     pessoa["Vida_maxima"] *= 1.1
     pessoa["Vida"] = pessoa["Vida_maxima"]
     pessoa["Mana_maxima"] *= 1.1
@@ -32,14 +33,17 @@ def batalha(monstro_batalha):
     vida_monstro = monstro_batalha["vida_multiplicada"]
     vida_maxima_monstro = vida_monstro
     vida_personagem = personagem["Vida"]
+    vida_maxima_personagem = personagem["Vida"]
+    mana_maxima_personagem = personagem["Mana"]
     mana_personagem = personagem["Mana"]
+    curas_disponiveis = 3
     while True:
         print(f'{personagem["Nome"]} vs {monstro_batalha["nome"]}')
         print(f'Turno: {turno}')
         print(f'Vida de {monstro_batalha["nome"]}: {vida_monstro:.2f}/{vida_maxima_monstro:.2f}')
-        print(f'Sua vida: {vida_personagem:.2f}')
-        print(f'Sua mana: {mana_personagem:.2f}')
-        acao = escolher(("1", "2", "3"), ("1- Atacar\n2- Fugir(60% de sucesso)\n3- Curar 20% da vida e 20 de mana\n"))
+        print(f'Sua vida: {vida_personagem:.2f}/{vida_maxima_personagem:.2f}')
+        print(f'Sua mana: {mana_personagem:.2f}/{mana_maxima_personagem:.2f}')
+        acao = escolher(("1", "2", "3"), (f"1- Atacar\n2- Fugir(60% de sucesso)\n3- Curar 20% da vida e 20 de mana ({curas_disponiveis} usos restantes)\n"))
         mult_dano_jogador = random.choice(margem_mult_dano)
         mult_dano_monstro = random.choice(margem_mult_dano)
 
@@ -55,14 +59,17 @@ def batalha(monstro_batalha):
                         print(f'Mana insuficiente para usar este ataque!')
                     else:
                         break
-            vida_monstro -= ((ataque["dano"] * personagem["Dano"]) * mult_dano_jogador)
-            print(f'Causou {((ataque["dano"] * personagem["Dano"]) * mult_dano_jogador):.2f} de dano!')
+            if atk == "Raio" or ataque == "Tornado":
+                vida_monstro -= ((ataque["dano"] * personagem["Dano_magico"]) * mult_dano_jogador)
+                print(f'Causou {((ataque["dano"] * personagem["Dano_magico"]) * mult_dano_jogador):.2f} de dano!')
+            else:
+                vida_monstro -= ((ataque["dano"] * personagem["Dano"]) * mult_dano_jogador)
+                print(f'Causou {((ataque["dano"] * personagem["Dano"]) * mult_dano_jogador):.2f} de dano!')
             mana_personagem -= ataque["mana"]
             sleep(0.3)
         elif acao == "2":
             print(f'Tentando fugir...')
             fugiu = random.randint(0, 100) 
-            print(fugiu)
             if fugiu <= 60:
                 luta.append('Fugiu')
                 sleep(2)
@@ -70,9 +77,13 @@ def batalha(monstro_batalha):
             print('FALHOU!')
             sleep(0.2)
         elif acao == "3":
-            vida_personagem = min(vida_personagem + personagem["Vida_maxima"] * 0.2, personagem["Vida_maxima"])
-            mana_personagem = min(mana_personagem + 20, personagem["Mana_maxima"])
-            print(f'Curando a vida e restaurando mana...')
+            if curas_disponiveis > 0:
+                vida_personagem = min(vida_personagem + personagem["Vida_maxima"] * 0.2, personagem["Vida_maxima"])
+                mana_personagem = min(mana_personagem + 20, personagem["Mana_maxima"])
+                print(f'Curando a vida e restaurando mana...')
+                curas_disponiveis -= 1
+            else:
+                print(f'Você não tem mais curas disponíveis! Gastou o turno!')
             sleep(2)
         if vida_monstro <= 0:
             print(f'Você matou {monstro_batalha["nome"]}')
@@ -83,7 +94,7 @@ def batalha(monstro_batalha):
         sleep(0.1)
         vida_personagem -= (monstro_batalha["dano_multiplicado"] * mult_dano_monstro)
         print(f'Causou {(monstro_batalha["dano_multiplicado"] * mult_dano_monstro):.2f} de dano!')
-        sleep(0.3)
+        sleep(1)
         if vida_personagem <= 0:
             print('Você morreu!')
             luta.append('Morreu')
@@ -94,14 +105,14 @@ def batalha(monstro_batalha):
     personagem["Vida"] -= (personagem["Vida"] - vida_personagem)
     personagem["Mana"] -= (personagem["Mana"] - mana_personagem)
 racas = {
-    "Humano":{"vida":100, "mana":50, "dano":1.2},
-    "Elfo":{"vida": 90, "mana":100, "dano":0.5},
-    "Dracônico":{"vida": 110, "mana":40, "dano":1.3}
+    "Humano":{"vida":100, "mana":50, "dano":1.2, "dano_magico":0.7},
+    "Elfo":{"vida": 90, "mana":100, "dano":0.5, "dano_magico":1.5},
+    "Dracônico":{"vida": 110, "mana":40, "dano":1.3, "dano_magico":0.3}
 }
 classes = {
-    "Tank":{"multiplicador_de_vida": 1.2, "multiplicador_de_mana": 0.8, "multiplicador_de_dano": 1.2 },
-    "Mago":{"multiplicador_de_vida": 0.95, "multiplicador_de_mana": 1.5, "multiplicador_de_dano": 0.5},
-    "Espadachim":{"multiplicador_de_vida": 1.0, "multiplicador_de_mana": 0.7, "multiplicador_de_dano": 1.3}
+    "Tank":{"multiplicador_de_vida": 1.5, "multiplicador_de_mana": 0.8, "multiplicador_de_dano": 1.2, "multiplicador_de_dano_magico": 0.5},
+    "Mago":{"multiplicador_de_vida": 0.95, "multiplicador_de_mana": 1.5, "multiplicador_de_dano": 0.5, "multiplicador_de_dano_magico": 1.3},
+    "Espadachim":{"multiplicador_de_vida": 1.0, "multiplicador_de_mana": 0.7, "multiplicador_de_dano": 1.5, "multiplicador_de_dano_magico": 0.5}
 }
 ataques = {
     "Corte":{"dano":30, "mana": 0},
@@ -131,6 +142,7 @@ personagem = {
     "Mana": (racas[raca]["mana"] * classes[classe]["multiplicador_de_mana"]),
     "Mana_maxima": (racas[raca]["mana"] * classes[classe]["multiplicador_de_mana"]),
     "Dano": (racas[raca]["dano"] * classes[classe]["multiplicador_de_dano"]),
+    "Dano_magico": (racas[raca]["dano_magico"] * classes[classe]["multiplicador_de_dano_magico"]),
     "Level": 1,
     "Xp": 0,
     "Xp_maximo": 100,
@@ -189,14 +201,18 @@ while True:
                     print(f'Você upou para o level {personagem["Level"]}!')
                     print('Sua vida e mana foram restauradas!')
                     if personagem["Level"] >= 5 and "Investida" not in ataques:
-                        print('Você upou para o level 5!!! Ataques desbloquados: Investida, Tornado')
+                        print('Você upou para o level 5!!! Ataques desbloqueados: Investida, Tornado')
                         ataques["Investida"] = {"dano": 50,"mana": 10}
                         ataques["Tornado"] = {"dano": 60,"mana": 40}
             if batalhas == 3:
                 print('Você se sente cansado e decide ir embora...')
                 sleep(2)
                 break        
-            cont = str(input('Quer continuar caçando?'))
+            while True:
+                cont = str(input('Quer continuar caçando?'))
+                if cont in ('S', 's'):
+                    break
+                print('Para parar, reponda n!')
             if cont in ('N', 'n'):
                 break
             batalhas += 1
@@ -218,7 +234,6 @@ while True:
                 os.system("clear")
                 print('Parabéns!!! Você zerou o Galactus RPG!')
                 sleep(5)
-                os.system("sl")
                 break
             else:
                 print('Que pena!!! Tente de novo!')
