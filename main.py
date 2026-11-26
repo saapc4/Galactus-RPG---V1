@@ -59,7 +59,7 @@ def batalha(monstro_batalha):
                         print(f'Mana insuficiente para usar este ataque!')
                     else:
                         break
-            if atk == "Raio" or ataque == "Tornado":
+            if atk == "Raio" or atk == "Tornado":
                 vida_monstro -= ((ataque["dano"] * personagem["Dano_magico"]) * mult_dano_jogador)
                 print(f'Causou {((ataque["dano"] * personagem["Dano_magico"]) * mult_dano_jogador):.2f} de dano!')
             else:
@@ -122,9 +122,16 @@ monstros = {
     'Slime':{"nome": 'Slime', "vida":(25, 40), "dano":(8, 20), "xp":(30, 60)},
     'Lobo':{"nome": 'Lobo', "vida":(50, 70), "dano":(18, 30), "xp":(80, 110)},
     'Traunt':{"nome": 'Traunt', "vida":(80, 100), "dano":(35, 60), "xp":(130, 170)},
-    "Dragão Sábio": {"nome": "O Grande Dragão Sábio", "vida":(450, 550),"dano":(50, 70),"xp":(450, 550)}
+}
+bosses = {
+    "Dragão Sábio": {"nome": "O Grande Dragão Sábio", "vida":(450, 550),"dano":(50, 70),"xp":(450, 550)},
+    "Cobra Loka": {"nome": "A Cobra Loka", "vida":()}
+
 }
 
+
+
+zerou = 0
 print('Bem vindo ao Galactus RPG')
 nome = str(input('Qual seu nome? '))
 print(f'Olá {nome}')
@@ -202,8 +209,8 @@ while True:
                     print('Sua vida e mana foram restauradas!')
                     if personagem["Level"] >= 5 and "Investida" not in ataques:
                         print('Você upou para o level 5!!! Ataques desbloqueados: Investida, Tornado')
-                        ataques["Investida"] = {"dano": 50,"mana": 10}
-                        ataques["Tornado"] = {"dano": 60,"mana": 40}
+                        ataques["Investida"] = {"dano": 55,"mana": 10}
+                        ataques["Tornado"] = {"dano": 75,"mana": 30}
             if batalhas == 3:
                 print('Você se sente cansado e decide ir embora...')
                 sleep(2)
@@ -224,15 +231,16 @@ while True:
         print('Você descansa o dia inteiro e tem sua vida e mana restauradas.')
     dias_restantes -= 1
     if dias_restantes == 0:
-        print(f'\nVocê irá batalhar com {monstros["Dragão Sábio"]["nome"]}!')
+        print(f'\nVocê irá batalhar com {bosses["Dragão Sábio"]["nome"]}!')
         sleep(5)
         os.system("clear")
         while True:
             recuperar(personagem)
-            batalha(monstros["Dragão Sábio"])
+            batalha(bosses["Dragão Sábio"])
             if luta[0] == 'Venceu':
                 os.system("clear")
                 print('Parabéns!!! Você zerou o Galactus RPG!')
+                zerou += 1
                 sleep(5)
                 break
             else:
